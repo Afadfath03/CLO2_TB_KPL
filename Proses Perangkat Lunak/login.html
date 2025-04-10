@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Task Management</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Task Management Login</h1>
+    
+    <div class="form-container">
+      <h2>Choose Your Role</h2>
+      <button onclick="goToAdmin()">Admin Login</button>
+      <button onclick="goToUser()">User Login</button>
+    </div>
+  </div>
+
+  <script>
+    // Function to navigate to Admin page
+    function goToAdmin() {
+      window.location.href = 'admin.html'; // Redirect to Admin page
+    }
+
+    // Function to navigate to User page
+    function goToUser() {
+      window.location.href = 'index.html'; // Redirect to User page
+    }
+  </script>
+</body>
+</html>
