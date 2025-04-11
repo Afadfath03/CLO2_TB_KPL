@@ -4,11 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <title>Task Manager</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" href="style_index.css">
+    <link rel="stylesheet" href="header.css">
 </head>
 
 <body>
-    <h1>Task Manager</h1>
+    <nav>
+        <header>
+            <div class="name">
+                <a href="index.html">Task Manager</a>
+            </div>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="login.html">User</a></li>
+            </ul>
+        </header>
+    </nav>
 
     <form id="taskForm">
         <input type="text" id="taskName" name="taskName" placeholder="Task Name" required />
