@@ -1,11 +1,15 @@
 # TaskManagement_tubes_sem6
 
 Requirement:
+
 1. Web Runner (XAMPP dll)
-2. Node Js
+2. Sudah terinstall Node Js
 
 Cara pakai:
-1. `npm ini -y`
-2. Aktifkan apache dan mysql
-3. Buka terminal di folder project
-4. `Node server.js` dan buka link di browser
+
+1. Buka terminal di folder project
+2. ketik `npm init -y` lalu `npm install`
+3. Aktifkan apache dan mysql di xampp
+4. Untuk menjalankan server secara lokal
+   - Ketik `node server.js` di terminal
+   - Buka localhost sesuai hasil perintah di atas di browser
