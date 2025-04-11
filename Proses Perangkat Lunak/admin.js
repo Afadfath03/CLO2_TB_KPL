@@ -1,12 +1,18 @@
 document.addEventListener('DOMContentLoaded', function () {
-  const users = [];
+  const users = [{
+    name: "John Doe",
+    email: "john.doe@example.com",
+    password: "password123" // Added password field to users array
+  }];
+
   const userTable = document.getElementById('user-table').getElementsByTagName('tbody')[0];
   const userForm = document.getElementById('user-form');
   const userIdInput = document.getElementById('user-id');
   const userNameInput = document.getElementById('user-name');
   const userEmailInput = document.getElementById('user-email');
+  const userPasswordInput = document.getElementById('user-password'); // Reference for password field
 
-  // Function to render users in the table
+  // Function to render user data in the table
   function renderUsers() {
     userTable.innerHTML = '';
     users.forEach((user, index) => {
@@ -14,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
       row.innerHTML = `
         <td>${user.name}</td>
         <td>${user.email}</td>
+        <td>${user.password}</td> <!-- Display password -->
         <td>
           <button class="edit" onclick="editUser(${index})">Edit</button>
           <button class="delete" onclick="deleteUser(${index})">Delete</button>
@@ -22,37 +29,41 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   }
 
-  // Handle form submit for create/update user
+  // Handle form submit for create/update user data
   userForm.addEventListener('submit', function (event) {
     event.preventDefault();
     const name = userNameInput.value.trim();
     const email = userEmailInput.value.trim();
+    const password = userPasswordInput.value.trim(); // Get the password input
 
-    if (name && email) {
+    if (name && email && password) {
       const userId = userIdInput.value;
       if (userId) {
         // Update user
         users[userId].name = name;
         users[userId].email = email;
+        users[userId].password = password; // Update password
       } else {
         // Add new user
-        users.push({ name, email });
+        users.push({ name, email, password });
       }
 
       // Clear the form
       userNameInput.value = '';
       userEmailInput.value = '';
+      userPasswordInput.value = ''; // Clear the password field
       userIdInput.value = '';
 
       renderUsers();
     }
   });
 
-  // Edit user
+  // Edit user data
   window.editUser = function (index) {
     const user = users[index];
     userNameInput.value = user.name;
     userEmailInput.value = user.email;
+    userPasswordInput.value = user.password; // Populate password field
     userIdInput.value = index;
   };
 
