@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User - Task Management</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Task Management (User)</h1>
+
+    <button id="back-home" onclick="goHome()">Go to Admin Page</button>
+
+    <div class="form-container">
+      <h2>Edit Your Profile</h2>
+      <form id="user-form">
+        <input type="hidden" id="user-id">
+        <input type="text" id="user-name" placeholder="Enter Your Name" required>
+        <input type="email" id="user-email" placeholder="Enter Your Email" required>
+        <input type="password" id="user-password" placeholder="Enter Your Password" required> <!-- Password field added -->
+        <button type="submit">Submit</button>
+      </form>
+    </div>
+
+    <h2>Your Info</h2>
+    <table id="user-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Password</th> <!-- Added column for password -->
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- User info will be listed here -->
+      </tbody>
+    </table>
+  </div>
+
+  <script src="user.js"></script>
+</body>
+</html>
