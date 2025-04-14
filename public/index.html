@@ -2,106 +2,96 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Task Manager</title>
-    <link rel="stylesheet" type="text/css" href="style.css">
+  <meta charset="UTF-8">
+  <title>Task Manager</title>
+  <link rel="stylesheet" href="style_index.css">
+  <link rel="stylesheet" href="header.css">
+  <script src="main.js" defer></script>
+  <script src="i18n.js"></script>
 </head>
 
 <body>
-    <h1>Task Manager</h1>
+  <!-- Navigasi -->
+  <nav>
+    <header>
+      <div class="name">
+        <a href="index.html" data-i18n="app_title">Task Manager</a>
+      </div>
+      <ul class="nav-links">
+        <li><a href="index.html" data-i18n="home">Home</a></li>
+        <li><a href="login.html" data-i18n="user">User</a></li>
+      </ul>
+    </header>
+  </nav>
 
-    <form id="taskForm">
-        <input type="text" id="taskName" name="taskName" placeholder="Task Name" required />
-        <input type="datetime-local" id="deadline" name="deadline" placeholder="Deadline" required />
-        <button type="submit">Add Task</button>
-    </form>
+  <!-- Tombol Dropdown Bahasa -->
+  <div class="dropdown-lang" style="position: absolute; top: 10px; right: 10px;">
+    <button id="lang-toggle"
+      style="background-color: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;">
+      🌐 <span id="lang-btn-label">Pilih Bahasa</span>
+    </button>
+    <div id="lang-menu"
+      style="display: none; position: absolute; background-color: white; border: 1px solid #ccc; border-radius: 4px; z-index: 1; right: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: opacity 0.2s ease;">
+      <div onclick="setLanguage('id')" style="padding: 8px 12px; cursor: pointer;">Indonesia</div>
+      <div onclick="setLanguage('en')" style="padding: 8px 12px; cursor: pointer;">English</div>
+    </div>
+  </div>
 
-    <table id="tasksTable">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Task</th>
-                <th>Status</th>
-                <th>Deadline</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="tasksList"></tbody>
-    </table>
+  <!-- Form Tambah Tugas -->
+  <form id="taskForm">
+    <input type="text" placeholder="Masukkan nama tugas" data-i18n-placeholder="inputTask" />
+    <input type="datetime-local" name="deadline" required />
+    <button id="add-task-btn" data-i18n="add_task_btn">Tambah Tugas</button>
+  </form>
 
-    <script>
-        async function fetchTasks() {
-            const response = await fetch("/api/tasks");
-            const tasks = await response.json();
-            const tasksList = document.getElementById("tasksList");
+  <!-- Tabel Tugas -->
+  <table id="tasksTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th data-i18n="task">Tugas</th>
+        <th data-i18n="status">Status</th>
+        <th data-i18n="deadline">Tenggat</th>
+        <th data-i18n="actions">Aksi</th>
+      </tr>
+    </thead>
+    <tbody id="tasksList"></tbody>
+  </table>
 
-            tasksList.innerHTML = "";
+  <!-- Script Bahasa -->
+  <script>
+    const langToggle = document.getElementById('lang-toggle');
+    const langMenu = document.getElementById('lang-menu');
+    const langBtnLabel = document.getElementById('lang-btn-label');
 
-            tasks.forEach(task => {
-                const row = `
-                <tr>
-                    <td>${task.id}</td>
-                    <td>${task.name}</td>
-                    <td>
-                    <span 
-                        class="status" 
-                        data-status="${task.status}" 
-                        data-task-id="${task.id}" 
-                        onclick="toggleStatus(${task.id})"
-                    >
-                        ${task.status ? 'Completed' : 'Incomplete'}
-                    </span>
-                    </td>
-                    <td>${new Date(task.deadline).toLocaleString()}</td>
-                    <td>
-                    <button onclick="deleteTask(${task.id})">Delete</button>
-                    </td>
-                </tr>
-                `;
-                ;
-                tasksList.innerHTML += row;
-            });
-        }
+    // Tampilkan/sembunyikan menu dropdown
+    langToggle.addEventListener('click', () => {
+      langMenu.style.display = langMenu.style.display === 'block' ? 'none' : 'block';
+    });
 
-        document.getElementById("taskForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-            const taskName = e.target.taskName.value;
-            const deadline = e.target.deadline.value;
-            await fetch("/api/tasks", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name: taskName, deadline: deadline })
-            });
-            e.target.reset();
-            await fetchTasks();
-        });
+    // Setel bahasa dan refresh halaman
+    function setLanguage(lang) {
+      localStorage.setItem('lang', lang);
+      location.reload();
+    }
 
-        async function toggleStatus(taskId) {
-            const statusElement = document.querySelector(
-                `.status[data-task-id="${taskId}"]`
-            );
-            const currentStatus = statusElement.getAttribute("data-status") === "1";
-            const newStatus = currentStatus ? 0 : 1;
+    // Tambahkan header bahasa di setiap fetch request
+    const originalFetch = window.fetch;
+    window.fetch = function (...args) {
+      const [url, options = {}] = args;
+      const lang = localStorage.getItem('lang') || 'id';
+      options.headers = {
+        ...options.headers,
+        'Accept-Language': lang
+      };
+      return originalFetch(url, options);
+    };
 
-            await fetch(`/api/tasks/${taskId}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ status: newStatus })
-            });
-            await fetchTasks();
-        }
+    // Update label tombol dropdown sesuai bahasa
+    const currentLang = localStorage.getItem('lang') || 'id';
+    langBtnLabel.textContent = currentLang === 'id' ? 'Indonesia' : 'English';
+  </script>
 
-        async function deleteTask(taskId) {
-            if (confirm("Are you sure?")) {
-                await fetch(`/api/tasks/${taskId}`, {
-                    method: "DELETE"
-                });
-                await fetchTasks();
-            }
-        }
-
-        window.onload = () => fetchTasks();
-    </script>
 </body>
 
 </html>

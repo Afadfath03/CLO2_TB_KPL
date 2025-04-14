@@ -14,6 +14,10 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
+const languageMiddleware = require("./middleware/languageMiddleware");
+app.use(languageMiddleware);
+
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("public"));
