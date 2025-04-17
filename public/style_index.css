@@ -34,13 +34,8 @@ button:hover {
 }
 
 .status {
-    cursor: pointer;
     padding: 5px;
     transition: color 0.3s;
-}
-
-.status:hover {
-    text-decoration: underline;
 }
 
 .status[data-status="1"] {

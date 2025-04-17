@@ -8,7 +8,6 @@
   "task_deleted": "Tugas berhasil dihapus",
   "login": "Masuk",
   "logout": "Keluar",
-  "submit": "Kirim",
   "name": "Nama",
   "email": "Email",
   "password": "Kata Sandi",
@@ -43,5 +42,9 @@
   "enter_user_email": "Masukkan Email Pengguna",
   "enter_user_password": "Masukkan Kata Sandi Pengguna",
   "language_id": "Indonesia",
-  "language_en": "English"
+  "language_en": "English",
+  "unfinished_task": "Belum Selesai",
+  "finished_task": "Selesai",
+  "role_admin": "Admin",
+  "role_user": "Pengguna"
 }

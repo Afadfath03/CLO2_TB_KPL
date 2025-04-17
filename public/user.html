@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="header.css">
   <script src="i18n.js"></script>
+  <script src="logout.js"></script>
 </head>
 
 <body>
@@ -19,7 +20,7 @@
         </div>
         <ul class="nav-links">
           <li><a href="index.html" data-i18n="home">Home</a></li>
-        </ul>
+          <li><a href="#" onclick="logout()" data-i18n="logout">Log Out</a></li>
       </header>
     </nav>
 
@@ -97,5 +98,7 @@
     langBtnLabel.textContent = currentLang === 'id' ? 'Indonesia' : 'English';
   </script>
 </body>
+
+
 
 </html>

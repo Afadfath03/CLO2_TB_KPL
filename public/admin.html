@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="header.css">
   <script src="i18n.js"></script>
+  <script src="logout.js"></script>
 </head>
 
 <body>
@@ -15,11 +16,11 @@
     <nav>
       <header>
         <div class="name">
-          <a href="index.html" data-i18n="app_title">User Management</a>
+          <a href="index.html" data-i18n="profile_manaj">Profile Manager</a>
         </div>
         <ul class="nav-links">
           <li><a href="index.html" data-i18n="home">Home</a></li>
-          <li><a href="admin.html" data-i18n="admin">Admin</a></li>
+          <li><a href="#" onclick="logout()" data-i18n="logout">Log Out</a></li>
         </ul>
       </header>
     </nav>
@@ -47,6 +48,11 @@
           data-i18n-placeholder="enter_user_email">
         <input type="password" id="user-password" placeholder="Enter User Password" required
           data-i18n-placeholder="enter_user_password">
+        <select id="user-role" required>
+          <option value="" disabled selected data-i18n="select_role">Select Role</option>
+          <option value="admin" data-i18n="role_admin">Admin</option>
+          <option value="user" data-i18n="role_user">User</option>
+        </select>
         <button type="submit" data-i18n="submit">Submit</button>
       </form>
     </div>
@@ -61,7 +67,7 @@
           <th data-i18n="actions">Actions</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="userTableBody">
         <!-- Users will be listed here -->
       </tbody>
     </table>

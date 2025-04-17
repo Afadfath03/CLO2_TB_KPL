@@ -37,10 +37,13 @@
   "table_password": "Password",
   "table_actions": "Actions",
   "create_update_user": "Create/Update User",
-  "submit": "Submit",
   "enter_user_name": "Enter User Name",
   "enter_user_email": "Enter User Email",
   "enter_user_password": "Enter User Password",
   "language_id": "Indonesia",
-  "language_en": "English"
+  "language_en": "English",
+  "unfinished_task": "Unfinished",
+  "finished_task": "Finished",
+  "role_admin": "Admin",
+  "role_user": "User"
 }

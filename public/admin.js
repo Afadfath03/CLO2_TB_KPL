@@ -1,83 +1,135 @@
-document.addEventListener('DOMContentLoaded', function () {
-  const users = [{
-    name: "John Doe",
-    email: "john.doe@example.com",
-    password: "password123" // Added password field to users array
-  }];
+document.addEventListener("DOMContentLoaded", () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Unauthorized access. Please login.");
+    window.location.href = "login.html";
+    return;
+  }
 
-  const userTable = document.getElementById('user-table').getElementsByTagName('tbody')[0];
-  const userForm = document.getElementById('user-form');
-  const userIdInput = document.getElementById('user-id');
-  const userNameInput = document.getElementById('user-name');
-  const userEmailInput = document.getElementById('user-email');
-  const userPasswordInput = document.getElementById('user-password'); // Reference for password field
+  console.log("Token:", token); // Debug token
+  console.log("User role:", JSON.parse(atob(token.split(".")[1])).role); // Debug user role
 
-  // Function to render user data in the table
-  function renderUsers() {
-    userTable.innerHTML = '';
-    users.forEach((user, index) => {
-      const row = userTable.insertRow();
+  const userTable = document.getElementById("user-table").getElementsByTagName("tbody")[0];
+  const userForm = document.getElementById("user-form");
+  const userIdInput = document.getElementById("user-id");
+  const userNameInput = document.getElementById("user-name");
+  const userEmailInput = document.getElementById("user-email");
+  const userPasswordInput = document.getElementById("user-password");
+  const userRoleInput = document.getElementById("user-role");
+
+  async function fetchUsers() {
+    try {
+      const response = await fetch("/api/users", {
+        headers: {
+          Authorization: `Bearer ${token}`, // Pastikan formatnya benar
+        },
+      });
+
+      if (response.status === 403) {
+        console.error("Forbidden. You do not have admin access.");
+        alert("Access denied. Admin privileges are required.");
+        return;
+      }
+
+      const users = await response.json();
+      console.log(users);
+      renderUser(users);
+    } catch (err) {
+      console.error("Failed to fetch users:", err);
+    }
+  }
+
+  function renderUser(users) {
+    const userTable = document.getElementById("userTableBody");
+    userTable.innerHTML = "";
+
+    users.forEach((user) => {
+      const row = document.createElement("tr");
       row.innerHTML = `
+        <td>${user.id}</td>
         <td>${user.name}</td>
         <td>${user.email}</td>
-        <td>${user.password}</td> <!-- Display password -->
         <td>
-          <button class="edit" onclick="editUser(${index})">Edit</button>
-          <button class="delete" onclick="deleteUser(${index})">Delete</button>
+          <button onclick="editUser(${user.id})">Edit</button>
+          <button onclick="deleteUser(${user.id})">Delete</button>
         </td>
       `;
+      userTable.appendChild(row);
     });
   }
 
-  // Handle form submit for create/update user data
-  userForm.addEventListener('submit', function (event) {
-    event.preventDefault();
-    const name = userNameInput.value.trim();
-    const email = userEmailInput.value.trim();
-    const password = userPasswordInput.value.trim(); // Get the password input
+  window.editUser = async (id) => {
+    try {
+      const response = await fetch(`/api/users/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    if (name && email && password) {
-      const userId = userIdInput.value;
-      if (userId) {
+      const user = await response.json();
+
+      userIdInput.value = user.id;
+      userNameInput.value = user.name;
+      userEmailInput.value = user.email;
+      userRoleInput.value = user.role;
+    } catch (err) {
+      console.error("Failed to fetch user:", err);
+    }
+  };
+
+  window.deleteUser = async (id) => {
+    if (confirm("Are you sure you want to delete this user?")) {
+      try {
+        await fetch(`/api/users/${id}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        fetchUsers();
+      } catch (err) {
+        console.error("Failed to delete user:", err);
+      }
+    }
+  };
+
+  userForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const id = userIdInput.value;
+    const name = userNameInput.value;
+    const email = userEmailInput.value;
+    const password = userPasswordInput.value;
+    const strrole = userRoleInput.value;
+    const role = strrole === "Admin" ? 0 : 1;
+    
+    console.log("Form submitted:", { id, name, email, password, role }); // Debug form submission
+
+    try {
+      if (id) {
         // Update user
-        users[userId].name = name;
-        users[userId].email = email;
-        users[userId].password = password; // Update password
+        await fetch(`/api/users/${id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ name, email, password, role }),
+        });
       } else {
-        // Add new user
-        users.push({ name, email, password });
+        // Create user
+        await fetch("/api/users", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ name, email, password, role }),
+        });
       }
 
-      // Clear the form
-      userNameInput.value = '';
-      userEmailInput.value = '';
-      userPasswordInput.value = ''; // Clear the password field
-      userIdInput.value = '';
-
-      renderUsers();
+      userForm.reset();
+      fetchUsers();
+    } catch (err) {
+      console.error("Failed to save user:", err);
     }
   });
 
-  // Edit user data
-  window.editUser = function (index) {
-    const user = users[index];
-    userNameInput.value = user.name;
-    userEmailInput.value = user.email;
-    userPasswordInput.value = user.password; // Populate password field
-    userIdInput.value = index;
-  };
-
-  // Delete user
-  window.deleteUser = function (index) {
-    users.splice(index, 1);
-    renderUsers();
-  };
-
-  // Go to User page
-  window.goHome = function () {
-    window.location.href = 'index.html'; // Redirect to User page
-  };
-
-  // Initial render
-  renderUsers();
+  fetchUsers();
 });

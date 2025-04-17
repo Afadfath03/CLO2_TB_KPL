@@ -4,42 +4,73 @@ const statusOrder = {
 };
 
 async function fetchTasks() {
-  const response = await fetch("/api/tasks");
-  const tasks = await response.json();
-  const tasksList = document.getElementById("tasksList");
+  try {
+    const response = await fetch("/api/tasks");
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    let tasks = await response.json();
 
-  tasksList.innerHTML = "";
+    tasks = tasks.sort((a, b) => a.status - b.status);
 
-  const sortedTasks = [...tasks].sort(
-    (a, b) =>
-      statusOrder[a.status ? "Completed" : "Incomplete"] -
-      statusOrder[b.status ? "Completed" : "Incomplete"]
-  );
-
-  sortedTasks.forEach((task) => {
-    const row = `
-      <tr>
-        <td>${task.id}</td>
-        <td>${task.name}</td>
-        <td>
-          <span 
-            class="status" 
-            data-status="${task.status}" 
-            data-task-id="${task.id}" 
-            onclick="toggleStatus(${task.id})"
-          >
-            ${task.status ? "Completed" : "Incomplete"}
-          </span>
-        </td>
-        <td>${new Date(task.deadline).toLocaleString()}</td>
-        <td>
-          <button onclick="deleteTask(${task.id})" data-i18n="delete_btn">Delete</button>
-        </td>
-      </tr>
-    `;
-    tasksList.innerHTML += row;
-  });
+    console.log(tasks);
+    renderTasks(tasks);
+  } catch (err) {
+    console.error("Failed to fetch tasks:", err);
+  }
 }
+
+function renderTasks(tasks) {
+  const tasksList = document.getElementById("tasksList");
+  tasksList.innerHTML = ""; // Kosongkan tabel sebelum menambahkan data baru
+
+  tasks.forEach((task) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+      <td>${task.id}</td>
+      <td>${task.name}</td>
+      <td class="status" data-task-id="${task.id}" data-status="${task.status}">
+        <span data-i18n="${task.status === 0 ? 'unfinished_task' : 'finished_task'}">
+          ${task.status === 0 ? "Unfinished" : "Finished"}
+        </span>
+      </td>
+      <td>${task.deadline}</td>
+      <td>
+        <button onclick="toggleStatus(${task.id})" data-i18n="toggle_status">Toggle Status</button>
+        <button onclick="deleteTask(${task.id})" data-i18n="delete_btn">Delete</button>
+      </td>
+    `;
+    tasksList.appendChild(row);
+  });
+
+  applyLanguage();
+}
+
+async function toggleStatus(taskId) {
+  const statusElement = document.querySelector(`.status[data-task-id="${taskId}"]`);
+  const currentStatus = parseInt(statusElement.getAttribute("data-status"), 10);
+  const newStatus = currentStatus === 1 ? 0 : 1;
+
+  try {
+    const response = await fetch(`/api/tasks/${taskId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus })
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to update task status");
+    }
+
+    await fetchTasks();
+  } catch (err) {
+    console.error("Failed to toggle task status:", err);
+    alert("Failed to update task status. Please try again.");
+  }
+}
+
+document.addEventListener("DOMContentLoaded", fetchTasks);
 
 document.getElementById("taskForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -49,14 +80,22 @@ document.getElementById("taskForm").addEventListener("submit", async (e) => {
   const taskName = nameInput.value;
   const deadline = deadlineInput.value;
 
-  await fetch("/api/tasks", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ name: taskName, deadline })
-  });
+  try {
+    const response = await fetch("/api/tasks", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: taskName, deadline })
+    });
 
-  e.target.reset();
-  await fetchTasks();
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    e.target.reset();
+    await fetchTasks();
+  } catch (err) {
+    console.error("Failed to create task:", err);
+  }
 });
 
 async function applyTranslations(lang) {
@@ -100,11 +139,24 @@ async function toggleStatus(taskId) {
 }
 
 async function deleteTask(taskId) {
-  if (confirm("Are you sure?")) {
-    await fetch(`/api/tasks/${taskId}`, {
-      method: "DELETE"
+  if (!confirm("Are you sure you want to delete this task?")) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`/api/tasks/${taskId}`, {
+      method: "DELETE",
     });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Failed to delete task");
+    }
+
     await fetchTasks();
+  } catch (err) {
+    console.error("Failed to delete task:", err);
+    alert("Failed to delete task. Please try again.");
   }
 }
 

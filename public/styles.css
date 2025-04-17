@@ -61,7 +61,7 @@ button {
   flex-direction: column;
 }
 
-form input {
+form input, select {
   padding: 10px;
   margin: 10px 0;
   border-radius: 5px;
