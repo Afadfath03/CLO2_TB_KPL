@@ -1,67 +1,108 @@
-document.addEventListener('DOMContentLoaded', function () {
-  const users = [{
-    name: "John Doe",
-    email: "john.doe@example.com",
-    password: "password123" // Added password field to users array
-  }];
-
-  const userTable = document.getElementById('user-table').getElementsByTagName('tbody')[0];
-  const userForm = document.getElementById('user-form');
-  const userIdInput = document.getElementById('user-id');
-  const userNameInput = document.getElementById('user-name');
-  const userEmailInput = document.getElementById('user-email');
-  const userPasswordInput = document.getElementById('user-password'); // Reference for password field
-
-  // Function to render user data in the table
-  function renderUserInfo() {
-    userTable.innerHTML = '';
-    const user = users[0];  // Only show the logged-in user info (index 0)
-    const row = userTable.insertRow();
-    row.innerHTML = `
-      <td>${user.name}</td>
-      <td>${user.email}</td>
-      <td>${user.password}</td> <!-- Display password -->
-      <td>
-        <button class="edit" onclick="editUser()">Edit</button>
-      </td>
-    `;
+document.addEventListener("DOMContentLoaded", async () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Unauthorized access. Please login.");
+    window.location.href = "login.html";
+    return;
   }
 
-  // Handle form submit for update user data
-  userForm.addEventListener('submit', function (event) {
+  const userTable = document.getElementById("user-table").getElementsByTagName("tbody")[0];
+  const userForm = document.getElementById("user-form");
+  const userNameInput = document.getElementById("user-name");
+  const userEmailInput = document.getElementById("user-email");
+  const userPasswordInput = document.getElementById("user-password");
+
+  // user.js
+  async function fetchUserProfile() {
+    const token = localStorage.getItem('token'); // Ambil token dari localStorage atau sumber lain
+    if (!token) {
+      console.error("Token tidak ditemukan");
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/me', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`, // Sertakan token di header
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.status === 403) {
+        console.error("Akses ditolak: Anda tidak memiliki izin.");
+        return;
+      }
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Profil bang ", data);
+      renderUserProfile(data);
+    } catch (error) {
+      console.error("Error saat mengambil profil pengguna:", error);
+    }
+  }
+
+  function renderUserProfile(user) {
+    userTable.innerHTML = ""; // Clear existing rows
+
+    const row = userTable.insertRow();
+    const cell1 = row.insertCell(0);
+    const cell2 = row.insertCell(1);
+    const cell3 = row.insertCell(2);
+    const cell4 = row.insertCell(3);
+
+    cell1.textContent = user.name;
+    cell2.textContent = user.email;
+    cell3.textContent = user.password; // Display password (for demo purposes only)
+    cell4.innerHTML = `<button class="btn btn-primary" onclick="editUser()">Edit</button>`;
+  }
+
+  window.editUser = function () {
+    const row = userTable.rows[0]; // Assuming only one user profile is displayed
+    userNameInput.value = row.cells[0].textContent;
+    userEmailInput.value = row.cells[1].textContent;
+    userPasswordInput.value = row.cells[2].textContent; // For demo purposes only
+  }
+
+  // Handle form submission for updating user data
+  userForm.addEventListener("submit", async (event) => {
     event.preventDefault();
+
     const name = userNameInput.value.trim();
     const email = userEmailInput.value.trim();
-    const password = userPasswordInput.value.trim(); // Get the password input
+    const password = userPasswordInput.value.trim();
 
-    if (name && email && password) {
-      // Update user data (only self)
-      users[0].name = name;
-      users[0].email = email;
-      users[0].password = password; // Update password
+    if (!name || !email || !password) {
+      alert("All fields are required.");
+      return;
+    }
 
-      // Clear the form
-      userNameInput.value = '';
-      userEmailInput.value = '';
-      userPasswordInput.value = ''; // Clear the password field
+    try {
+      const response = await fetch("/api/me", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ name, email, password }),
+      });
 
-      renderUserInfo();
+      if (!response.ok) {
+        throw new Error("Failed to update user profile");
+      }
+
+      alert("Profile updated successfully.");
+      fetchUserProfile();
+    } catch (err) {
+      console.error("Failed to update user profile:", err);
+      alert("Failed to update user profile. Please try again.");
     }
   });
 
-  // Edit user data (only self)
-  window.editUser = function () {
-    const user = users[0];
-    userNameInput.value = user.name;
-    userEmailInput.value = user.email;
-    userPasswordInput.value = user.password; // Populate password field
-  };
-
-  // Go to Admin page
-  window.goHome = function () {
-    window.location.href = 'admin.html'; // Redirect to Admin page
-  };
-
-  // Initial render
-  renderUserInfo();
+  // Initial fetch
+  await fetchUserProfile();
 });

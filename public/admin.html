@@ -4,9 +4,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin - Task Management</title>
+  <title data-i18n="app_title">Admin - Task Management</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="header.css">
+  <script src="i18n.js"></script>
+  <script src="logout.js"></script>
 </head>
 
 <body>
@@ -14,43 +16,98 @@
     <nav>
       <header>
         <div class="name">
-          <a href="index.html">User Management</a>
+          <a href="index.html" data-i18n="profile_manaj">Profile Manager</a>
         </div>
         <ul class="nav-links">
-          <li><a href="index.html">Home</a></li>
+          <li><a href="index.html" data-i18n="home">Home</a></li>
+          <li><a href="#" onclick="logout()" data-i18n="logout">Log Out</a></li>
         </ul>
       </header>
     </nav>
 
+    <!-- Tombol Dropdown Bahasa -->
+    <div class="dropdown-lang" style="position: absolute; top: 10px; right: 10px;">
+      <button id="lang-toggle"
+        style="background-color: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;">
+        🌐 <span id="lang-btn-label">Pilih Bahasa</span>
+      </button>
+      <div id="lang-menu"
+        style="display: none; position: absolute; background-color: white; border: 1px solid #ccc; border-radius: 4px; z-index: 1; right: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: opacity 0.2s ease;">
+        <div onclick="setLanguage('id')" style="padding: 8px 12px; cursor: pointer;">Indonesia</div>
+        <div onclick="setLanguage('en')" style="padding: 8px 12px; cursor: pointer;">English</div>
+      </div>
+    </div>
+
     <div class="form-container">
-      <h2>Create/Update User</h2>
+      <h2 data-i18n="create_update_user">Create/Update User</h2>
       <form id="user-form">
         <input type="hidden" id="user-id">
-        <input type="text" id="user-name" placeholder="Enter User Name" required>
-        <input type="email" id="user-email" placeholder="Enter User Email" required>
-        <input type="password" id="user-password" placeholder="Enter User Password" required>
-        <!-- Password field added -->
-        <button type="submit">Submit</button>
+        <input type="text" id="user-name" placeholder="Enter User Name" required
+          data-i18n-placeholder="enter_user_name">
+        <input type="email" id="user-email" placeholder="Enter User Email" required
+          data-i18n-placeholder="enter_user_email">
+        <input type="password" id="user-password" placeholder="Enter User Password" required
+          data-i18n-placeholder="enter_user_password">
+        <select id="user-role" required>
+          <option value="" disabled selected data-i18n="select_role">Select Role</option>
+          <option value="admin" data-i18n="role_admin">Admin</option>
+          <option value="user" data-i18n="role_user">User</option>
+        </select>
+        <button type="submit" data-i18n="submit">Submit</button>
       </form>
     </div>
 
-    <h2>Users</h2>
+    <h2 data-i18n="users">Users</h2>
     <table id="user-table">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Password</th> <!-- Added column for password -->
-          <th>Actions</th>
+          <th data-i18n="name">Name</th>
+          <th data-i18n="email">Email</th>
+          <th data-i18n="password">Password</th>
+          <th data-i18n="actions">Actions</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody id="userTableBody">
         <!-- Users will be listed here -->
       </tbody>
     </table>
   </div>
 
   <script src="admin.js"></script>
+
+  <!-- Script Bahasa -->
+  <script>
+    const langToggle = document.getElementById('lang-toggle');
+    const langMenu = document.getElementById('lang-menu');
+    const langBtnLabel = document.getElementById('lang-btn-label');
+
+    // Tampilkan/sembunyikan menu dropdown
+    langToggle.addEventListener('click', () => {
+      langMenu.style.display = langMenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Setel bahasa dan refresh halaman
+    function setLanguage(lang) {
+      localStorage.setItem('lang', lang);
+      location.reload();
+    }
+
+    // Tambahkan header bahasa di setiap fetch request
+    const originalFetch = window.fetch;
+    window.fetch = function (...args) {
+      const [url, options = {}] = args;
+      const lang = localStorage.getItem('lang') || 'id';
+      options.headers = {
+        ...options.headers,
+        'Accept-Language': lang
+      };
+      return originalFetch(url, options);
+    };
+
+    // Update label tombol dropdown sesuai bahasa
+    const currentLang = localStorage.getItem('lang') || 'id';
+    langBtnLabel.textContent = currentLang === 'id' ? 'Indonesia' : 'English';
+  </script>
 </body>
 
 </html>

@@ -7,6 +7,7 @@
   <title>Login - Task Management</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="header.css">
+  <script src="i18n.js"></script>
 </head>
 
 <body>
@@ -17,26 +18,42 @@
           <a href="index.html">User Login</a>
         </div>
         <ul class="nav-links">
-          <li><a href="index.html">Home</a></li>
+          <li><a href="index.html" data-i18n="home">Home</a></li>
         </ul>
       </header>
     </nav>
 
+    <!-- Tombol Dropdown Bahasa -->
+    <div class="dropdown-lang" style="position: absolute; top: 10px; right: 10px;">
+      <button id="lang-toggle"
+        style="background-color: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;">
+        🌐 <span id="lang-btn-label">Pilih Bahasa</span>
+      </button>
+      <div id="lang-menu"
+        style="display: none; position: absolute; background-color: white; border: 1px solid #ccc; border-radius: 4px; z-index: 1; right: 0; box-shadow: 0 4px 8px rgba(0,0,0,0.1); transition: opacity 0.2s ease;">
+        <div onclick="setLanguage('id')" style="padding: 8px 12px; cursor: pointer;">Indonesia</div>
+        <div onclick="setLanguage('en')" style="padding: 8px 12px; cursor: pointer;">English</div>
+      </div>
+    </div>
+
     <div class="form-container">
       <form action="login_process.php" method="POST">
-        <label for="username">Name or Email:</label>
-        <input type="text" id="username" name="username" required>
+        <label for="username" data-i18n="login_username">Name or Email:</label>
+        <input type="text" id="username" name="username" required data-i18n-placeholder="login_username_placeholder">
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
+        <label for="password" data-i18n="login_password">Password:</label>
+        <input type="password" id="password" name="password" required
+          data-i18n-placeholder="login_password_placeholder">
 
-        <button type="submit">Login</button>
-        <button type="button" onclick="goToAdmin()">Go to Admin Page</button>
-        <button type="button" onclick="goToUser()">Go to User Page</button>
+        <button type="submit" data-i18n="login_button">Login</button>
+        <button type="button" onclick="goToAdmin()" data-i18n="goto_admin">Go to Admin Page</button>
+        <button type="button" onclick="goToUser()" data-i18n="goto_user">Go to User Page</button>
+
       </form>
     </div>
   </div>
 
+  <!-- test button goto next page -->
   <script>
     // Function to navigate to Admin page
     function goToAdmin() {
@@ -48,6 +65,43 @@
       window.location.href = 'user.html'; // Redirect to User page
     }
   </script>
+
+  <!-- Script Bahasa -->
+  <script>
+    const langToggle = document.getElementById('lang-toggle');
+    const langMenu = document.getElementById('lang-menu');
+    const langBtnLabel = document.getElementById('lang-btn-label');
+
+    // Tampilkan/sembunyikan menu dropdown
+    langToggle.addEventListener('click', () => {
+      langMenu.style.display = langMenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // Setel bahasa dan refresh halaman
+    function setLanguage(lang) {
+      localStorage.setItem('lang', lang);
+      location.reload();
+    }
+
+    // Tambahkan header bahasa di setiap fetch request
+    const originalFetch = window.fetch;
+    window.fetch = function (...args) {
+      const [url, options = {}] = args;
+      const lang = localStorage.getItem('lang') || 'id';
+      options.headers = {
+        ...options.headers,
+        'Accept-Language': lang
+      };
+      return originalFetch(url, options);
+    };
+
+    // Update label tombol dropdown sesuai bahasa
+    const currentLang = localStorage.getItem('lang') || 'id';
+    langBtnLabel.textContent = currentLang === 'id' ? 'Indonesia' : 'English';
+  </script>
+
+  <script src="login.js"></script>
+
 </body>
 
 </html>
