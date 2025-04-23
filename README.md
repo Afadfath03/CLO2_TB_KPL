@@ -11,5 +11,5 @@ Cara pakai:
 2. ketik `npm init -y` lalu `npm install`
 3. Aktifkan apache dan mysql di xampp
 4. Untuk menjalankan server secara lokal
-   - Ketik `node server.js` di terminal
+   - Ketik `node index.js` di terminal
    - Buka localhost sesuai hasil perintah di atas di browser
