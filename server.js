@@ -3,10 +3,9 @@ const mysql = require("mysql2/promise");
 const jwt = require("jsonwebtoken");
 
 const app = express();
-const PORT = 3000;
 const SECRET_KEY = "your_secret_key";
 
-const pool = mysql.createPool({
+let pool = mysql.createPool({
     host: "localhost",
     user: "root",
     password: "",
@@ -41,10 +40,10 @@ function authenticateToken(req, res, next) {
 
     jwt.verify(token, SECRET_KEY, (err, user) => {
         if (err) {
-            console.error("Token verification failed:", err); // Debug error
+            // console.error("Token verification failed:", err); // Debug error
             return res.status(403).json({ message: 'Token tidak valid' });
         }
-        console.log("Decoded token:", user); // Debug decoded token
+        // console.log("Decoded token:", user); // Debug decoded token
         req.user = user;
         next();
     });
@@ -67,12 +66,12 @@ function isUser(req, res, next) {
 app.post("/api/login", async (req, res) => {
     const { emailOrUsername, password } = req.body;
     try {
-        console.log("Login attempt:", emailOrUsername, password); // Debug input
+        // console.log("Login attempt:", emailOrUsername, password); // Debug input
         const [rows] = await pool.query(
             "SELECT * FROM users WHERE (email = ? OR name = ?) AND password = ?",
             [emailOrUsername, emailOrUsername, password]
         );
-        console.log("Query result:", rows); // Debug query result
+        // console.log("Query result:", rows); // Debug query result
 
         if (rows.length === 0) {
             return res.status(401).json({ error: "Username atau Email atau Password salah" });
@@ -237,6 +236,4 @@ app.delete("/api/users/:id", authenticateToken, isAdmin, roleActionsTable[0].act
 app.get("/api/me", authenticateToken, isUser, roleActionsTable[1].actions.viewProfile);
 app.put("/api/me", authenticateToken, isUser, roleActionsTable[1].actions.updateProfile);
 
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
+module.exports = app;

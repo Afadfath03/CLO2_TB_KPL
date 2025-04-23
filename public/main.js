@@ -24,6 +24,8 @@ function renderTasks(tasks) {
   const tasksList = document.getElementById("tasksList");
   tasksList.innerHTML = ""; // Kosongkan tabel sebelum menambahkan data baru
 
+
+  console.log(tasks.deadline);
   tasks.forEach((task) => {
     const row = document.createElement("tr");
     row.innerHTML = `
