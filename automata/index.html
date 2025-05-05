@@ -1,18 +1,246 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>Task Manager</title>
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #333;
+      color: white;
+      padding: 10px 20px;
+    }
+
+    .navbar .logo {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .navbar .nav-links {
+      display: flex;
+      align-items: center;
+    }
+
+    .navbar .nav-links a {
+      color: white;
+      margin-left: 15px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+
+    .navbar .nav-links a:hover {
+      text-decoration: underline;
+    }
+
+    .navbar .lang-btn {
+      margin-left: 15px;
+      background-color: #e74c3c;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .navbar .lang-btn:hover {
+      background-color: #c0392b;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+
+    h2 {
+      background-color: #007bff;
+      color: white;
+      padding: 10px;
+      border-radius: 5px 5px 0 0;
+    }
+
+    .form-section, .task-table {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    input, select, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    table, th, td {
+      border: 1px solid #ddd;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+    }
+
+    .action-btns button {
+      margin-right: 5px;
+    }
+  </style>
 </head>
 <body>
-  <div class="container">
-    <h1>📋 Task Management</h1>
-    <div id="task-list"></div>
+
+  <!-- NAVBAR -->
+  <div class="navbar">
+    <div class="logo">Task Manager</div>
+    <div class="nav-links">
+      <a href="#">Home</a>
+      <a href="#">User</a>
+      <button class="lang-btn">🌐 English</button>
+    </div>
   </div>
 
-  <script src="main.js"></script>
+  <!-- MAIN CONTENT -->
+  <div class="container">
+
+    <!-- Form -->
+    <div class="form-section">
+      <h2>Buat/Ubah Tugas</h2>
+      <input type="text" id="task-title" placeholder="Masukkan Judul Tugas">
+      <select id="task-status">
+        <option value="todo">📝 Todo</option>
+        <option value="in-progress">⏳ In Progress</option>
+        <option value="done">✅ Done</option>
+      </select>
+      <button onclick="addTask()">Kirim</button>
+    </div>
+
+    <!-- Tabel Tugas -->
+    <div class="task-table">
+      <h2>Daftar Tugas</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Judul</th>
+            <th>Status</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="task-list"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    const statusOrder = {
+      "todo": 0,
+      "in-progress": 1,
+      "done": 2,
+    };
+
+    let tasks = [
+      { id: 1, title: "Desain UI", status: "in-progress" },
+      { id: 2, title: "Setup project", status: "todo" },
+      { id: 3, title: "Deploy", status: "done" },
+    ];
+
+    let nextId = 4;
+
+    function renderTasks() {
+      const taskListEl = document.getElementById("task-list");
+      taskListEl.innerHTML = "";
+
+      const sortedTasks = [...tasks].sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+
+      sortedTasks.forEach((task, index) => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${task.title}</td>
+          <td>
+            <select onchange="updateTaskStatus(${task.id}, this.value)">
+              <option value="todo" ${task.status === "todo" ? "selected" : ""}>📝 Todo</option>
+              <option value="in-progress" ${task.status === "in-progress" ? "selected" : ""}>⏳ In Progress</option>
+              <option value="done" ${task.status === "done" ? "selected" : ""}>✅ Done</option>
+            </select>
+          </td>
+          <td class="action-btns">
+            <button onclick="editTask(${task.id})">Edit</button>
+            <button onclick="deleteTask(${task.id})">Delete</button>
+          </td>
+        `;
+        taskListEl.appendChild(row);
+      });
+    }
+
+    function updateTaskStatus(id, newStatus) {
+      tasks = tasks.map(task => task.id === id ? { ...task, status: newStatus } : task);
+      renderTasks();
+    }
+
+    function addTask() {
+      const title = document.getElementById("task-title").value.trim();
+      const status = document.getElementById("task-status").value;
+
+      if (title === "") return alert("Judul tidak boleh kosong!");
+
+      tasks.push({ id: nextId++, title, status });
+      document.getElementById("task-title").value = "";
+      document.getElementById("task-status").value = "todo";
+      renderTasks();
+    }
+
+    function editTask(id) {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        document.getElementById("task-title").value = task.title;
+        document.getElementById("task-status").value = task.status;
+        tasks = tasks.filter(t => t.id !== id); // remove for update
+        renderTasks();
+      }
+    }
+
+    function deleteTask(id) {
+      if (confirm("Yakin ingin menghapus tugas ini?")) {
+        tasks = tasks.filter(task => task.id !== id);
+        renderTasks();
+      }
+    }
+
+    renderTasks(); // render awal
+  </script>
+
 </body>
 </html>
-
